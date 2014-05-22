@@ -54,7 +54,9 @@ function updateip ( $machine ){
         }
 }
 
+
 function CheckUserMachine($username,$machine){
+	$con = conect();
 	$result = mysqli_query($con,"SELECT * FROM ipUser");
 	$stack = array();
 	while($row = mysqli_fetch_array($result)){
@@ -69,15 +71,14 @@ function CheckUserMachine($username,$machine){
 function getIP($username,$machine){
 	$con = conect();
 	if (checkUserMachine($username,$machine) == true){
-    	$result = mysqli_query($con,"SELECT * FROM ipHost ORDER BY TimeStamp");        
+    	$result = mysqli_query($con,"SELECT INET_NTOA(IP) FROM ipHost WHERE username='".$username."' AND hostname='".$hostname."' ORDER BY TimeStamp");        
 	    while($row = mysqli_fetch_array($result)){
-    		if ( ($row['username'] == $username ) AND ($row['hostname'] == $machine) ){
-    	    	echo $row['IP'];
-        	}
-		return ip;
+    	    	echo $row;
+        }
 	}else{
-		echo "Machine and user does not exist";
+		echo "Machine and user does not existXX\n";
 	}
+	return "0";
 }
 
 function getLog($username,$machine){
@@ -86,31 +87,35 @@ function getLog($username,$machine){
     	$result = mysqli_query($con,"SELECT * FROM ipHost ORDER BY TimeStamp");        
 	    while($row = mysqli_fetch_array($result)){
     		if ( ($row['username'] == $username ) AND ($row['hostname'] == $machine) ){
-    	    $arr = array('user' => $row['user'], 'text' => $row['text'], 'date' => $row['date'], 'done' => $row['done'],'key' => $row['id']);
+    	    	$arr = array('user' => $row['user'], 'text' => $row['text'], 'date' => $row['date'], 'done' => $row['done'],'key' => $row['id']);
 	        	array_push($stack, $arr);
         	}
+        }
 		return ip;
 	}else{
 		echo "Machine and user does not exist";
 	}
 }
 
-function updateip($username,$machine,$ip){
+function updateMysql($username,$machine,$ip){
 	$con = conect();
-	$result = mysqli_query($con,"SELECT * FROM ipUser INTO ipHost values('"$username"','"$machine"',INET_ATON('"$ip"'),TIMESTAMP)");        
-    echo $result;
-
+	if (checkUserMachine($username,$machine) == true){
+		$result = mysqli_query($con,"SELECT * FROM ipUser INTO ipHost values('".$username."','".$machine."',INET_ATON('".$ip."'),TIMESTAMP)");        
+ 	   echo $result;
+	}
 }
 
 function conect(){
-		//conection=mysqli_connect("127.0.0.1","account","passswd","db");
+	//conection=mysqli_connect("127.0.0.1","account","passswd","db");
+	$conection=mysqli_connect("127.0.0.1","***REMOVED***","***REMOVED***","***REMOVED***");
 
-        if (mysqli_connect_errno($conection))
-        {
-                echo "Failed to connect to MySQL: " . mysqli_connect_error();
-        }
-        return $conection;
+	if (mysqli_connect_errno($conection))
+    {
+		echo "Failed to connect to MySQL: " . mysqli_connect_error();
+	}
+	return $conection;
 }
-
+$hick = getIP("oscar","test");
+echo $hick;
 start();
 ?>
