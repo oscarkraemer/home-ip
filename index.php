@@ -53,5 +53,64 @@ function updateip ( $machine ){
                	echo "same ip \n";
         }
 }
+
+function CheckUserMachine($username,$machine){
+	$result = mysqli_query($con,"SELECT * FROM ipUser");
+	$stack = array();
+	while($row = mysqli_fetch_array($result)){
+    	if (($row['username'] == $username ) AND ( $row['hostname'] == $machine) ){
+    		return true;
+    	}
+    }
+    return false;
+}
+
+
+function getIP($username,$machine){
+	$con = conect();
+	if (checkUserMachine($username,$machine) == true){
+    	$result = mysqli_query($con,"SELECT * FROM ipHost ORDER BY TimeStamp");        
+	    while($row = mysqli_fetch_array($result)){
+    		if ( ($row['username'] == $username ) AND ($row['hostname'] == $machine) ){
+    	    	echo $row['IP'];
+        	}
+		return ip;
+	}else{
+		echo "Machine and user does not exist";
+	}
+}
+
+function getLog($username,$machine){
+	$con = conect();
+	if (checkUserMachine($username,$machine) == true){
+    	$result = mysqli_query($con,"SELECT * FROM ipHost ORDER BY TimeStamp");        
+	    while($row = mysqli_fetch_array($result)){
+    		if ( ($row['username'] == $username ) AND ($row['hostname'] == $machine) ){
+    	    $arr = array('user' => $row['user'], 'text' => $row['text'], 'date' => $row['date'], 'done' => $row['done'],'key' => $row['id']);
+	        	array_push($stack, $arr);
+        	}
+		return ip;
+	}else{
+		echo "Machine and user does not exist";
+	}
+}
+
+function updateip($username,$machine,$ip){
+	$con = conect();
+	$result = mysqli_query($con,"SELECT * FROM ipUser INTO ipHost values('"$username"','"$machine"',INET_ATON('"$ip"'),TIMESTAMP)");        
+    echo $result;
+
+}
+
+function conect(){
+		//conection=mysqli_connect("127.0.0.1","account","passswd","db");
+
+        if (mysqli_connect_errno($conection))
+        {
+                echo "Failed to connect to MySQL: " . mysqli_connect_error();
+        }
+        return $conection;
+}
+
 start();
 ?>
