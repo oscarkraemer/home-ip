@@ -3,55 +3,46 @@
 #	Written by Oscar Kraemer 22.05.2014
 #
 function start(){
+	$out = "not set";
 	if( isset( $_GET['machine'])){
-		machineip($_GET['machine']);	
+		$out = getIP($_GET['machine']);	
 	}elseif( isset( $_GET['m'])){
-        	machineip($_GET['m']);
+        $out = getIP($_GET['m']);
 	}elseif( empty( $_POST['machine']) ){
-		echo $_SERVER['REMOTE_ADDR'];
-	}elseif( isset( $_POST['update']) ){
-		if ((file_exists( $_POST['machine'])) and ($_POST['update'] == 'true')){
-			updateip($_POST['machine']);
-		}else{
-			echo "machine does not exist :5 \n";
-		}
+		$out = $_SERVER['REMOTE_ADDR'];
+	}elseif( isset( $_POST['update']) ){	#TODO update
+		$out = updateip($_POST['machine']);
 	}elseif($_POST['machine']){
-		machineip($_POST['machine']);
+		$out = getIP($_POST['machine']);
 	}else{
 		echo "Congratulation you managed to make an request that I did not anticipate :1 \n";
 	}
+	echo $out;
 }
 
-
-function machineip( $machine ){
-	if (file_exists( $machine )){
-		$mf = fopen($machine,'r');
-        	echo fread($mf ,filesize($machine));
-        	fclose($mf);
+function updateip($machine){
+	$old = getIP($machine);
+	$new = $_SERVER['REMOTE_ADDR'];
+	if ($old == false){
+		return "Does not exist";
+	}elseif($new == $old){
+		return "Same ip";
 	}else{
-		echo "Machine does not exist :2 \n";
-	}	
+		$con = conect();
+		$result = mysqli_query($con, "UPDATE ipHost SET IP=(INET_ATON('".$new."')) WHERE hostname='".$machine."';");
+		$out = updateLog($machine, $new);
+		return $out;
+	}
+	
 }
+
 
 	
-function updateip ( $machine ){
-	$mf = fopen($machine,'r');
-	$oldip = fread($mf ,filesize($machine));
+function updateLog ( $machine, $new ){
+	$mf = fopen("ipaddr.log", 'a');
+	fwrite($mf,$newip." ".$machine.PHP_EOL);
 	fclose($mf);
-       	$newip = $_SERVER['REMOTE_ADDR'];
-       	if ( $newip != $oldip and $newip !="" ){
-               	$mf = fopen($machine,'w');
-               	fwrite($mf , $newip);
-               	fclose($mf);
-               	$mf = fopen("ipaddr.log", 'a');
-               	fwrite($mf,$newip." ".$machine.PHP_EOL);
-               	fclose($mf);
-               	echo "new ip written \n";
-               	$oldip = $newip;
-        }
-       	else {
-               	echo "same ip \n";
-        }
+	return "log Update";
 }
 
 
@@ -68,34 +59,17 @@ function CheckUserMachine($username,$machine){
 }
 
 
-function getIP($username,$machine){
+function getIP($machine){
 	$con = conect();
-	if (checkUserMachine($username,$machine) == true){
-    	$result = mysqli_query($con,"SELECT INET_NTOA(IP) FROM ipHost WHERE username='".$username."' AND hostname='".$hostname."' ORDER BY TimeStamp");        
-	    while($row = mysqli_fetch_array($result)){
-    	    	echo $row;
-        }
-	}else{
-		echo "Machine and user does not existXX\n";
-	}
-	return "0";
+    $result = mysqli_query($con,"SELECT hostname, INET_NTOA(IP) FROM ipHost");        
+	while($row = mysqli_fetch_array($result)){
+	   	if ($row['hostname'] == $machine){
+        		return $row["INET_NTOA(IP)"];
+       	}
+    }
+	return false;
 }
 
-function getLog($username,$machine){
-	$con = conect();
-	if (checkUserMachine($username,$machine) == true){
-    	$result = mysqli_query($con,"SELECT * FROM ipHost ORDER BY TimeStamp");        
-	    while($row = mysqli_fetch_array($result)){
-    		if ( ($row['username'] == $username ) AND ($row['hostname'] == $machine) ){
-    	    	$arr = array('user' => $row['user'], 'text' => $row['text'], 'date' => $row['date'], 'done' => $row['done'],'key' => $row['id']);
-	        	array_push($stack, $arr);
-        	}
-        }
-		return ip;
-	}else{
-		echo "Machine and user does not exist";
-	}
-}
 
 function updateMysql($username,$machine,$ip){
 	$con = conect();
@@ -115,7 +89,5 @@ function conect(){
 	}
 	return $conection;
 }
-$hick = getIP("oscar","test");
-echo $hick;
 start();
 ?>
