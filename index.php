@@ -40,7 +40,7 @@ function updateip($machine){
 
 function updateLog ( $machine, $new ){
 	$mf = fopen("ipaddr.log", 'a');
-	fwrite($mf,$newip." ".$machine.PHP_EOL);
+	fwrite($mf,$new." ".$machine.PHP_EOL);
 	fclose($mf);
 	return "log Update";
 }
