@@ -2,7 +2,6 @@
 #
 #	Written by Oscar Kraemer 22.05.2014
 #
-
 function start(){
 	$out = "not set";
 	if( isset( $_GET['machine'])){
@@ -33,7 +32,6 @@ function updateip($machine){
 		$out = updateLog($machine, $new);
 		return $out;
 	}
-	
 }
 
 function updateLog ( $machine, $new ){
@@ -64,17 +62,6 @@ function query($query){
     $result = mysqli_query($conection, $query);        
 	mysqli_close($conection);
 	return $result;
-}
-
-function conect(){
-	require "db.php";
-	//conection=mysqli_connect("127.0.0.1","account","passswd","db");
-	$conection=mysqli_connect($db_ip,$db_user,$db_passwd,$db_db);
-	if (mysqli_connect_errno($conection))
-    {
-		echo "Failed to connect to MySQL: " . mysqli_connect_error();
-	}
-	return $conection;
 }
 start();
 ?>
