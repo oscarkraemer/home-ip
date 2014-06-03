@@ -29,9 +29,7 @@ function updateip($machine){
 	}elseif($new == $old){
 		return "Same ip";
 	}else{
-		$con = conect();
-		$result = mysqli_query($con, "UPDATE ipHost SET IP=(INET_ATON('".$new."')) WHERE hostname='".$machine."';");
-		mysqli_close($con);
+		$result = query("UPDATE ipHost SET IP=(INET_ATON('".$new."')) WHERE hostname='".$machine."';");
 		$out = updateLog($machine, $new);
 		return $out;
 	}
@@ -46,18 +44,27 @@ function updateLog ( $machine, $new ){
 }
 
 function getIP($machine){
-	$con = conect();
-    $result = mysqli_query($con,"SELECT hostname, INET_NTOA(IP) FROM ipHost");        
+    $result = query("SELECT hostname, INET_NTOA(IP) FROM ipHost");        
 	while($row = mysqli_fetch_array($result)){
 	   	if ($row['hostname'] == $machine){
-	   		mysqli_close($con);
         	return $row["INET_NTOA(IP)"];
        	}
     }
-	mysqli_close($con);
 	return false;
 }
 
+function query($query){
+		require "db.php";
+	//conection=mysqli_connect("127.0.0.1","account","passswd","db");
+	$conection=mysqli_connect($db_ip,$db_user,$db_passwd,$db_db);
+	if (mysqli_connect_errno($conection))
+    {
+		echo "Failed to connect to MySQL: " . mysqli_connect_error();
+	}
+    $result = mysqli_query($conection, $query);        
+	mysqli_close($conection);
+	return $result;
+}
 
 function conect(){
 	require "db.php";
